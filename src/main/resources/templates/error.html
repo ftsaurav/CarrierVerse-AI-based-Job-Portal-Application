@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Something Went Wrong</title>
+  <style>
+    body {
+        font-family: 'Arial', sans-serif;
+        text-align: center;
+        background-color: #f8f9fa;
+        color: #333;
+        margin: 0;
+        padding: 50px;
+    }
+    .error-container {
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+    }
+    h1 {
+        font-size: 3em;
+        color: #dc3545;
+    }
+    p {
+        font-size: 1.2em;
+    }
+    .home-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 1.2em;
+        display: inline-block;
+        margin-top: 20px;
+    }
+    .home-btn:hover {
+        background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+<div class="error-container">
+  <h1>😢 Oops!</h1>
+  <p>Something went wrong. Please try again later.</p>
+  <a href="/" class="home-btn">Go to Home</a>
+</div>
+</body>
+</html>

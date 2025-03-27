@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Dashboard</title>
+    <meta charset="utf-8"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+    <meta name="description" content=""/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/styles.css}"/>
+    <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css} "/>
+    <link th:rel="stylesheet" th:href="@{/webjars/font-awesome/css/all.css}"/>
+
+</head>
+
+<body>
+<header class="navbar navbar-expand-lg navbar-dark">
+    <label class="mt-2 ms-5 font-weight-bold h5"
+    ><a th:href="@{/dashboard/}">CarrierVerse</a
+    ><span class="logo_com font-weight-bold h5" style="color: white">
+          .in</span
+    ></label
+    >
+    <button
+            class="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbarTogglerDemo02"
+            aria-controls="navbarTogglerDemo02"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+    >
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarToggler">
+        <ul class="navbar-nav m-auto mt-2 mt-lg-0">
+
+            <li class="nav-item active">
+                <a sec:authorize="hasAuthority('Job Seeker')" class="nav-link" th:href="@{/dashboard/}"
+                ><i class="fas fa-search"></i>Search for Jobs</a
+                >
+            </li>
+            <li class="nav-item ">
+                <a sec:authorize="hasAuthority('Job Seeker')" class="nav-link" th:href="@{/saved-jobs/}">
+                    <i class="fa-solid fa-eye"></i>View Saved Jobs</a>
+            </li>
+            <li class="nav-item ">
+                <a sec:authorize="hasAuthority('Job Seeker')" class="nav-link" th:href="@{/job-seeker-profile/}">
+                    <i class="fa-solid fa-pencil"></i>Edit Profile</a>
+            </li>
+
+            <li class="nav-item ">
+                <a sec:authorize="hasAuthority('Recruiter')" class="nav-link" th:href="@{/dashboard/add}"
+                ><i class="fa-solid fa-file-circle-plus"></i>Post New Job</a
+                >
+            </li>
+            <li class="nav-item active">
+                <a sec:authorize="hasAuthority('Recruiter')" class="nav-link" th:href="@{/dashboard/}"
+                > <i class="fa-solid fa-eye"></i>View Your Jobs</a
+                >
+            </li>
+            <li class="nav-item ">
+                <a sec:authorize="hasAuthority('Recruiter')" class="nav-link" th:href="@{/recruiter-profile/}"
+                > <i class="fa-solid fa-pencil"></i>Edit Account</a
+                >
+            </li>
+
+        </ul>
+
+        <img
+                class="rounded-circle me-3"
+                height="50px"
+                width="45px"
+                th:if="${user.photosImagePath!=null}"
+                th:src="@{${user?.photosImagePath}}"
+        />
+
+        <label th:if="${user.firstName != null && user.lastName != null}"
+               th:text="${user.firstName+' '+user.lastName}"
+               class="nav-item nav-link px-2 me-3 no-hover">
+        </label>
+
+        <label th:unless="${user.firstName != null && user.lastName != null}"
+               th:text="${username}"
+               class="nav-item nav-link px-2 me-3 no-hover">
+        </label>
+
+
+
+        <th:block sec:authorize="isAuthenticated() and not isAnonymous()">
+            <button class="myBtn-light me-5" onclick="confirmLogout()">Logout</button>
+        </th:block>
+
+        <script>
+            function confirmLogout() {
+                if (confirm("Are you sure you want to log out?")) {
+                    window.location.href = "/logout";
+                }
+            }
+        </script>
+
+        <div sec:authorize="hasAuthority('Job Seeker')">
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <style>
+                /* Floating Chatbot Button */
+                #faqChat-btn {
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    width: 60px;
+                    height: 60px;
+                    background-color: #007bff;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                }
+
+                #faqChat-btn img {
+                    width: 35px;
+                    height: 35px;
+                }
+
+                /* Chatbox */
+                #faqChat-container {
+                    position: fixed;
+                    bottom: 90px;
+                    right: 20px;
+                    width: 300px;
+                    height: 400px;
+                    background: white;
+                    border-radius: 10px;
+                    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                    display: none;
+                    flex-direction: column;
+                    border: 1px solid #ccc;
+                }
+
+                #faqChat-header {
+                    background: #007bff;
+                    color: white;
+                    padding: 10px;
+                    text-align: center;
+                    font-weight: bold;
+                    cursor: pointer;
+                    border-top-left-radius: 10px;
+                    border-top-right-radius: 10px;
+                }
+
+                #faqChat-box {
+                    flex: 1;
+                    padding: 10px;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
+                    background-color: #f9f9f9;
+                }
+
+                .bot-question {
+                    background-color: #e9ecef;
+                    padding: 8px;
+                    border-radius: 5px;
+                    margin: 5px;
+                    cursor: pointer;
+                    border: 1px solid #ccc;
+                    text-align: center;
+                }
+
+                .user, .bot {
+                    margin: 5px;
+                    padding: 8px;
+                    border-radius: 5px;
+                    max-width: 80%;
+                }
+
+                .user { background-color: #d1e7ff; align-self: flex-end; }
+                .bot { background-color: #e9ecef; align-self: flex-start; }
+            </style>
+            </head>
+            <body>
+
+            <!-- Floating Chatbot Button -->
+            <div id="faqChat-btn" onclick="toggleFaqChat()">
+                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Chatbot">
+            </div>
+
+            <!-- Chatbox -->
+            <div id="faqChat-container">
+                <div id="faqChat-header" onclick="toggleFaqChat()">Chatbot (Click to close)</div>
+                <div id="faqChat-box">
+                    <div class="bot">Hello! Click a question below to get an answer:</div>
+                    <div id="faqQuestions"></div>
+                </div>
+            </div>
+
+            <script>
+                function toggleFaqChat() {
+                    let chatbox = document.getElementById("faqChat-container");
+                    chatbox.style.display = (chatbox.style.display === "none" || chatbox.style.display === "") ? "flex" : "none";
+
+                    if (chatbox.style.display === "flex") {
+                        loadFaqQuestions();
+                    }
+                }
+
+                function loadFaqQuestions() {
+                    $.get(`/api/chatbot/questions`, function(questions) {
+                        let faqContainer = document.getElementById("faqQuestions");
+                        faqContainer.innerHTML = ""; // Clear previous questions
+
+                        questions.forEach(q => {
+                            let questionElem = document.createElement("div");
+                            questionElem.className = "bot-question";
+                            questionElem.innerText = q;
+                            questionElem.onclick = function() { askFaqChat(q); };
+                            faqContainer.appendChild(questionElem);
+                        });
+
+                        // Ensure questions are always visible after interaction
+                        let chatbox = document.getElementById("faqChat-box");
+                        chatbox.appendChild(faqContainer);
+                        chatbox.scrollTop = chatbox.scrollHeight;
+                    });
+                }
+
+                function askFaqChat(question) {
+                    let chatbox = document.getElementById("faqChat-box");
+
+                    // Append user question
+                    chatbox.innerHTML += `<div class="user">${question}</div>`;
+
+                    // Get chatbot response
+                    $.get(`/api/chatbot/ask?question=${encodeURIComponent(question)}`, function(response) {
+                        chatbox.innerHTML += `<div class="bot">${response}</div>`;
+
+                        // Ensure the chatbox scrolls to the latest message
+                        chatbox.scrollTop = chatbox.scrollHeight;
+
+                        // **Reload and append questions again after answering**
+                        setTimeout(loadFaqQuestions, 500);
+                    });
+                }
+            </script>
+
+
+
+            </body>
+        </div>
+
+
+
+    </div>
+</header>
+
+<section class="section">
+    <div class="sidenav px-5">
+
+        <div sec:authorize="hasAuthority('Recruiter')">
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <style>
+                .chat-container {
+                    width: 200px;
+                    height: 300px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    padding: 10px;
+                    overflow-y: auto;
+                    background: #000000;
+                }
+                .input-container {
+                    margin-top: 10px;
+                    display: flex;
+                    flex-direction:column;
+                }
+                input {
+                    flex: 1;
+                    padding: 5px;
+                }
+                button {
+                    padding: 5px;
+                    background: blue;
+                    color: white;
+                    border: white;
+                    cursor: pointer;
+                }
+                .message {
+                    background: #ff0000;
+                    padding: 5px;
+                    margin: 5px 0;
+                    border-radius: 5px;
+                }
+                .ai-message {
+                    background: #6da37d;
+                }
+                .copy-btn{
+                    padding: 5px;
+                    background: black;
+                    color: white;
+                    border: white;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    }
+            </style>
+            <body>
+
+            <div class="chat-container" id="chatBox">
+                <div class="message">👋 Hello! Enter a job role and requirements to generate a description.</div>
+            </div>
+
+            <div class="input-container">
+                <input type="text" id="role" placeholder="Enter job role...">
+                <input type="text" id="requirements" placeholder="Enter requirements...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+            <script>
+                function sendMessage() {
+                    let role = document.getElementById("role").value;
+                    let requirements = document.getElementById("requirements").value;
+
+                    if (!role || !requirements) {
+                        alert("Please enter job role and requirements.");
+                        return;
+                    }
+
+                    let chatBox = document.getElementById("chatBox");
+                    chatBox.innerHTML += `<div class='message'>📢 <b>You:</b> ${role} - ${requirements}</div>`;
+
+                    console.log("🔹 Sending request:", { role, requirements });
+
+                    $.ajax({
+                        type: "POST",
+                        url: "http://localhost:8080/api/chat/generate",  // Ensure backend is running
+                        contentType: "application/json",
+                        data: JSON.stringify({ role: role, requirements: requirements }),
+                        success: function (response) {
+                        console.log("🔹 API Response:", response);
+
+                        let aiMessage = document.createElement("div");
+                        aiMessage.classList.add("message", "ai-message");
+                        aiMessage.innerHTML = `
+                            🤖 <b>AI:</b> <span class="ai-text">${response}</span>
+                            <button class="copy-btn" onclick="copyText(this)">📋 Copy</button>`;
+
+                        chatBox.appendChild(aiMessage);
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                        },
+
+                        error: function (xhr) {
+                            console.log("❌ API Error:", xhr.responseText);
+                            chatBox.innerHTML += `<div class='message ai-message'>⚠️ Error generating job description.</div>`;
+                        }
+                    });
+
+                    document.getElementById("role").value = "";
+                    document.getElementById("requirements").value = "";
+                }
+
+                function copyText(button) {
+                let text = button.previousElementSibling.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    button.innerText = "✅ Copied!";
+                    setTimeout(() => button.innerText = "📋 Copy", 1500);
+                });
+                }
+            </script>
+
+
+            </body>
+        </div>
+
+        <div sec:authorize="hasAuthority('Job Seeker')">
+
+            <label class="text-uppercase color-dull font-weight-bold">Filter Results</label>
+            <hr/>
+            <form id="myForm" th:action="@{/dashboard/}">
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <label>Employment Type</label>
+                        <div class="form-check">
+                            <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    th:checked="${partTime}"
+                                    id="Part-time"
+                                    name="partTime"
+                                    th:value="Part-Time"
+                            />
+                            <label class="form-check-label" for="Part-time">
+                                Part-Time
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="full-time"
+                                    th:checked="${fullTime}"
+                                    name="fullTime"
+                                    th:value="Full-Time"
+                            />
+                            <label class="form-check-label" for="full-time">
+                                Full-Time
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value=""
+                                    id="freelance"
+                                    th:value="Freelance"
+                                    name="freelance"
+                                    th:checked="${freelance}"
+                            />
+                            <label class="form-check-label" for="freelance">
+                                Freelance
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+
+                        <label>Remote</label>
+                        <div class="form-check">
+                            <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="remote-only"
+                                    th:value="Remote-Only"
+                                    name="remoteOnly"
+                                    th:checked="${remoteOnly}"
+                            />
+                            <label class="form-check-label" for="remote-only">
+                                Remote-Only
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="Office-Only"
+                                    th:value="Office-Only"
+                                    name="officeOnly"
+                                    th:checked="${officeOnly}"
+                            />
+                            <label class="form-check-label" for="Office-Only">
+                                Office-Only
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="partial-remote"
+                                    th:value="Partial-Remote"
+                                    name="partialRemote"
+                                    th:checked="${partialRemote}"
+                            />
+                            <label class="form-check-label" for="partial-remote">
+                                Partial-Remote
+                            </label>
+                        </div>
+
+                    </div>
+                    <div class="col-lg-12">
+                        <label>Date Posted</label>
+                        <div class="form-check">
+                            <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="today"
+                                    name="today"
+                                    th:checked="${today}"
+                            />
+                            <label class="form-check-label" for="today"> Today </label>
+                        </div>
+                        <div class="form-check">
+                            <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="7days"
+                                    name="days7"
+                                    th:checked="${days7}"
+                            />
+                            <label class="form-check-label" for="7days">
+                                Last 7 Days
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="30days"
+                                    name="days30"
+                                    th:checked="${days30}"
+                            />
+                            <label class="form-check-label" for="30days">
+                                Last 30 Days
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <input id="hidJob" name="job" th:value="${job}" hidden>
+                <input id="hidLoc" name="location" th:value="${location}" hidden>
+            </form>
+        </div>
+
+    </div>
+
+
+    <article>
+
+        <div class="box" sec:authorize="hasAuthority('Job Seeker')">
+            <h1 class="primary-title">Candidate Dashboard</h1>
+            <div class="inner">
+                <input id="job" class="radius-left" type="text" placeholder="Search for a job" name="job"
+                       th:value="${job}"/>
+                <input id="loc" class="" type="text" placeholder="Job Location" name="location" th:value="${location}"/>
+                <button class="radius-right" type="submit" form="myForm"><i class="fa fa-search"></i></button>
+            </div>
+        </div>
+
+        <div class="box" sec:authorize="hasAuthority('Recruiter')">
+            <h1 class="primary-title">Recruiter Dashboard</h1>
+        </div>
+        <div class="box mt-3">
+            <label class="large-label px-3 mb-3" sec:authorize="hasAuthority('Job Seeker')">Search Results</label>
+            <th:block th:each="jobPost:${jobPost}">
+                <a
+                        th:href="@{/job-details-apply/{id}(id=${jobPost.jobPostId})}"
+                        style="text-decoration: none; color: black"
+                >
+                    <div
+                            onclick="window.location=/job-details-apply/{id}(id=${jobPost.jobPostId})"
+                            class="job-row"
+                    >
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="job-title text-left">
+                                    [[${jobPost.jobTitle}]]
+                                    <span
+                                            class="title-span"
+                                            sec:authorize="hasAuthority('Recruiter')"
+                                            th:text="'('+ @{${jobPost.totalCandidates}}+' Candidates Applied)'"
+                                    >(xx candidates applied)</span
+                                    >
+                                    <span
+                                            class="title-span"
+                                            sec:authorize="hasAuthority('Job Seeker')"
+                                            th:if="${jobPost.isActive == true}"
+                                    >(Applied)</span
+                                    >
+                                    <span
+                                            class="title-span"
+                                            sec:authorize="hasAuthority('Job Seeker')"
+                                            th:if="${jobPost.isSaved == true}"
+                                    >(Saved)</span
+                                    >
+                                </label>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <label
+                                        th:text="${jobPost.jobLocationId.city+', '+ jobPost.jobLocationId.state}"
+                                >
+                                    City State</label
+                                >
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <label th:text="@{${jobPost.jobCompanyId.name}}"
+                                >Recruiter Company Name</label
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </th:block>
+        </div>
+    </article>
+</section>
+
+<script
+        type="text/javascript"
+        th:src="@{/webjars/jquery/jquery.min.js}"
+></script>
+<script
+        type="text/javascript"
+        th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"
+></script>
+
+<script type="text/javascript" th:src="@{/js/main.js}"></script>
+<script>
+    $('#job').change(function() {
+      $('#hidJob').val($(this).val());
+    });
+    $('#loc').change(function() {
+      $('#hidLoc').val($(this).val());
+    });
+</script>
+
+</body>
+</html>
